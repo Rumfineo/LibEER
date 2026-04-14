@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import torch
 from torch.utils.data import DataLoader,RandomSampler, SequentialSampler
 from tqdm import tqdm
@@ -5,7 +7,8 @@ from tqdm import tqdm
 from utils.metric import Metric
 from utils.store import save_state
 
-def train(model, dataset_train, dataset_val, dataset_test, device, output_dir="result/", metrics=None, metric_choose=None, optimizer=None, scheduler=None, batch_size=16, epochs=40, criterion=None, loss_func=None, loss_param=None):
+
+def train(model, dataset_train, dataset_val, dataset_test, device, output_dir="result/", metrics=None, metric_choose=None, optimizer=None, scheduler=None, batch_size=16, epochs=40, criterion=None, loss_func=None, loss_param=None, num_workers=4):
     if metrics is None:
         metrics = ['acc']
     if metric_choose is None:
@@ -16,13 +19,13 @@ def train(model, dataset_train, dataset_val, dataset_test, device, output_dir="r
     sampler_test = SequentialSampler(dataset_test)
     # load dataset
     data_loader_train = DataLoader(
-        dataset_train, sampler=sampler_train, batch_size=batch_size, num_workers=4
+        dataset_train, sampler=sampler_train, batch_size=batch_size, num_workers=num_workers
     )
     data_loader_val = DataLoader(
-        dataset_val, sampler=sampler_val, batch_size=batch_size, num_workers=4
+        dataset_val, sampler=sampler_val, batch_size=batch_size, num_workers=num_workers
     )
     data_loader_test = DataLoader(
-        dataset_test, sampler=sampler_test, batch_size=batch_size, num_workers=4
+        dataset_test, sampler=sampler_test, batch_size=batch_size, num_workers=num_workers
     )
     model = model.to(device)
     best_metric = {s: 0. for s in metrics}
@@ -58,7 +61,8 @@ def train(model, dataset_train, dataset_val, dataset_test, device, output_dir="r
             if metric_value[m] > best_metric[m]:
                 best_metric[m] = metric_value[m]
                 save_state(output_dir, model, optimizer, epoch+1, metric=m)
-    model.load_state_dict(torch.load(f"{output_dir}/checkpoint-best{metric_choose}")['model'])
+    checkpoint_path = Path(output_dir) / f"checkpoint-best{metric_choose}.pth"
+    model.load_state_dict(torch.load(checkpoint_path)['model'])
     metric_value = evaluate(model, data_loader_test, device, metrics, criterion, loss_func, loss_param)
     for m in metrics:
         print(f"best_val_{m}: {best_metric[m]:.2f}")

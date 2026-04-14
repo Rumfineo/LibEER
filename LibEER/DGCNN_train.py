@@ -12,6 +12,7 @@ from models.DGCNN import NewSparseL2Regularization
 import torch
 import torch.optim as optim
 import torch.nn as nn
+from torch.utils.data import TensorDataset
 
 # run this file with
 #    reproduction
@@ -113,16 +114,17 @@ def main(args):
                 val_label = test_label
             model = Model['DGCNN'](channels, feature_dim, num_classes)
             # Train one round using the train one round function defined in the model
-            dataset_train = torch.utils.data.TensorDataset(torch.Tensor(train_data), torch.Tensor(train_label))
-            dataset_val = torch.utils.data.TensorDataset(torch.Tensor(val_data), torch.Tensor(val_label))
-            dataset_test = torch.utils.data.TensorDataset(torch.Tensor(test_data), torch.Tensor(test_label))
+            dataset_train = TensorDataset(torch.Tensor(train_data), torch.Tensor(train_label))
+            dataset_val = TensorDataset(torch.Tensor(val_data), torch.Tensor(val_label))
+            dataset_test = TensorDataset(torch.Tensor(test_data), torch.Tensor(test_label))
             optimizer = optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-4, eps=1e-4)
             criterion = nn.CrossEntropyLoss()
             loss_func = NewSparseL2Regularization(0.01).to(device)
             output_dir = make_output_dir(args, "DGCNN")
             round_metric = train(model=model, dataset_train=dataset_train, dataset_val=dataset_val, dataset_test=dataset_test, device=device,
                                  output_dir=output_dir, metrics=args.metrics, metric_choose=args.metric_choose, optimizer=optimizer,
-                                 batch_size=args.batch_size, epochs=args.epochs, criterion=criterion, test_sub_label=test_sub_label, loss_func=loss_func, loss_param=model)
+                                 batch_size=args.batch_size, epochs=args.epochs, criterion=criterion, loss_func=loss_func, loss_param=model,
+                                 num_workers=args.num_workers)
             # if sub indep, then return
             best_metrics.append(round_metric)
             if setting.experiment_mode == "subject-dependent":

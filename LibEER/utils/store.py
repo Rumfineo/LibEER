@@ -31,17 +31,36 @@ def save_state(output_dir, model, optimizer, epoch, r_idx='last', rr_idx='last',
         output_dir = output_dir / str(rr_idx)
 
     try:
-        os.makedirs(output_dir, exist_ok=True)
+        output_dir.mkdir(parents=True, exist_ok=True)
     except OSError as e:
         print(f"An error occurred: {e.strerror}")
-    checkpoint_path = output_dir / f'checkpoint-{str(epoch)}' if metric is None \
-        else output_dir / f'checkpoint-{state}{metric}'
+        return
+    checkpoint_path = output_dir / f'checkpoint-{str(epoch)}.pth' if metric is None \
+        else output_dir / f'checkpoint-{state}{metric}.pth'
+    temp_checkpoint_path = checkpoint_path.with_name(
+        f"{checkpoint_path.name}.tmp-{os.getpid()}-{time.time_ns()}"
+    )
     save = {
         'model': model.state_dict(),
         'optimizer': optimizer.state_dict(),
         'epoch': epoch,
     }
-    torch.save(save, checkpoint_path)
+    try:
+        torch.save(save, temp_checkpoint_path)
+        last_error = None
+        for _ in range(5):
+            try:
+                os.replace(temp_checkpoint_path, checkpoint_path)
+                last_error = None
+                break
+            except PermissionError as e:
+                last_error = e
+                time.sleep(0.1)
+        if last_error is not None:
+            raise last_error
+    finally:
+        if temp_checkpoint_path.exists():
+            temp_checkpoint_path.unlink()
     print(f"save model to {checkpoint_path}")
 
 
@@ -65,7 +84,7 @@ def save_data(args, data, label):
 def save_res(args, metric):
     log_dir = Path(args.log_dir)
     add_dir(log_dir)
-    log_file = log_dir / time.strftime("%Y-%m-%d %H:%M:%S", args.time)
+    log_file = log_dir / time.strftime("%Y-%m-%d_%H-%M-%S", args.time)
     if not os.path.exists(log_file):
         f = open(log_file, 'w')
         f.write(str(args))
