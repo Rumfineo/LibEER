@@ -86,12 +86,10 @@ def save_res(args, metric):
     add_dir(log_dir)
     log_file = log_dir / time.strftime("%Y-%m-%d_%H-%M-%S", args.time)
     if not os.path.exists(log_file):
-        f = open(log_file, 'w')
-        f.write(str(args))
-        f.close()
-    f = open(log_file, 'a')
-    f.write('\n'+str(metric))
-    f.close()
+        with open(log_file, 'w', encoding='utf-8') as f:
+            f.write(str(args))
+    with open(log_file, 'a', encoding='utf-8') as f:
+        f.write('\n' + str(metric))
 
 
 def add_dir(path):

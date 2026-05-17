@@ -31,5 +31,10 @@ Model = LazyModelRegistry({
     'FBSTCNet': ('models.FBSTCNet', 'PowerAndConneMixedNet'),
     'NSAL_DGAT': ('models.NSAL_DGAT', 'Domain_adaption_model'),
     'PRRL': ('models.PRRL', 'PRRL'),
+    'PCL_TDGCN': ('models.PCL_TDGCN', 'DomainAdaptationModel'),
+    'PCL_TDGCN_MLP': ('models.PCL_TDGCN', 'DomainAdaptationMLPModel'),
+    'PCL_TDGCN_NO_PCL': ('models.PCL_TDGCN', 'DomainAdaptationModel'),
+    'HankelFormer': ('models.hankelformer', 'HankelFormer'),
+    'hankelformer': ('models.hankelformer', 'HankelFormer'),
     'svm': ('models.SVM', 'SVM'),
 })

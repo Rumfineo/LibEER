@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+
+# Runtime outputs
+runs/
+log/
+result/
+results/
+*.log
+checkpoint-*
+
+# Local caches
+.cache/
+.pytest_cache/

@@ -1,0 +1,5 @@
+params:
+  layers: 2
+  hidden_1: 256
+  hidden_2: 64
+  weight_decay: 0.001

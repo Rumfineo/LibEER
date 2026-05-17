@@ -32,6 +32,7 @@ def train(model, dataset_train, dataset_val, dataset_test, device, output_dir="r
     for epoch in range(epochs):
         model.train()
         optimizer.zero_grad()
+        print(f"Epoch {epoch + 1}/{epochs}")
 
         # create Metric object
         metric = Metric(metrics)

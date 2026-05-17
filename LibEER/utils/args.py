@@ -72,4 +72,8 @@ def get_args_parser():
     parser.add_argument('-onehot', default=True, action='store_true', help="if use onehot code")
     parser.add_argument('-label_used', default=None, type=str, nargs='+', help="valence, arousal, dominance, liking")
     parser.add_argument('-keep_dim',default=False, action='store_true')
+    parser.add_argument('-lambda_contrastive', type=float, default=0.1)
+    parser.add_argument('-temp', type=float, default=0.2)
+    parser.add_argument('--window_size', default=48, type=int, help='window size for Hankel matrix')
+    parser.add_argument('--lambda_domain', default=0.1, type=float, help='weight for domain adversarial loss')
     return parser
